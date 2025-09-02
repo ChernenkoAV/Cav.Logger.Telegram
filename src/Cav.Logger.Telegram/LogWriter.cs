@@ -39,7 +39,11 @@ internal static class TelegramLogWriter
 
         try
         {
-            using var client = new RestClient(new RestClientOptions(new Uri($"https://api.telegram.org/bot{queueMessage.BotToken}/")));
+            using var client = new RestClient(
+                new RestClientOptions(
+                    new Uri($"https://api.telegram.org/bot{queueMessage.BotToken}/")
+                    ),
+                useClientFactory: true);
             await client.ExecuteAsync(req).ConfigureAwait(false);
         }
         catch { }

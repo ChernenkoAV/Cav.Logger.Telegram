@@ -10,11 +10,11 @@ internal class QueueMessage(string message, string botToken, string chatId, bool
     public bool DisableNotification => disableNotification;
 };
 
-internal class QueueMessageWriter : IDisposable
+internal static class QueueMessageWriter
 {
-    private BlockingCollection<QueueMessage> queues = [];
+    private static BlockingCollection<QueueMessage> queues = [];
 
-    public QueueMessageWriter()
+    static QueueMessageWriter()
     {
         var thrd = new Thread(sendMesg)
         {
@@ -25,10 +25,10 @@ internal class QueueMessageWriter : IDisposable
         thrd.Start();
     }
 
-    public void Enqueue(string message, string botToken, string chatId, bool disableNotification) =>
+    public static void Enqueue(string message, string botToken, string chatId, bool disableNotification) =>
         queues.Add(new(message, botToken, chatId, disableNotification));
 
-    private void sendMesg()
+    private static void sendMesg()
     {
         foreach (var qm in queues.GetConsumingEnumerable())
             try
@@ -38,11 +38,5 @@ internal class QueueMessageWriter : IDisposable
             finally
             {
             }
-    }
-
-    public void Dispose()
-    {
-        queues.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

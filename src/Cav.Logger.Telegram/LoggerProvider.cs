@@ -5,13 +5,14 @@ using Microsoft.Extensions.Options;
 namespace Cav.Logger.Telegram;
 
 [ProviderAlias("Telegram")]
-internal sealed class TelegramLoggerProvider : ILoggerProvider
+internal sealed class TelegramLoggerProvider : ILoggerProvider, ISupportExternalScope
 {
     private readonly IDisposable? onChangeToken;
     private TelegramLoggerConfiguration curConfig;
     private readonly ConcurrentDictionary<string, TelegramLogger> loggers =
         new(StringComparer.OrdinalIgnoreCase);
 
+    private IExternalScopeProvider? iExternalScopeProvider;
     public TelegramLoggerProvider(
         IOptionsMonitor<TelegramLoggerConfiguration> config)
     {
@@ -20,7 +21,7 @@ internal sealed class TelegramLoggerProvider : ILoggerProvider
     }
 
     public ILogger CreateLogger(string categoryName) =>
-        loggers.GetOrAdd(categoryName, name => new TelegramLogger(name, getCurrentConfig));
+        loggers.GetOrAdd(categoryName, name => new TelegramLogger(name, getCurrentConfig, iExternalScopeProvider));
 
     private TelegramLoggerConfiguration getCurrentConfig() => curConfig;
 
@@ -29,4 +30,6 @@ internal sealed class TelegramLoggerProvider : ILoggerProvider
         loggers.Clear();
         onChangeToken?.Dispose();
     }
+
+    public void SetScopeProvider(IExternalScopeProvider scopeProvider) => iExternalScopeProvider = scopeProvider;
 }

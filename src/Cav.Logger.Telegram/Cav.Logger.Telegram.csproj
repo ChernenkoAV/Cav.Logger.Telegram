@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-		<RepositoryUrl>https://github.com/ChernenkoAV/Cav.Logger.Telegram.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/ChernenkoAV/Cav.Logger.Telegram.git</RepositoryUrl>
         <PackageProjectUrl>https://github.com/ChernenkoAV/Cav.Logger.Telegram</PackageProjectUrl>
-		
+    
         <TargetFrameworks>net8.0</TargetFrameworks>
     </PropertyGroup>
 
@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <PackageVersion>0.4.0</PackageVersion>
+        <PackageVersion>0.5.0</PackageVersion>
         <Description>Логгер в телеграм</Description>
         <PackageTags>$(PackageTags) logger telegram</PackageTags>
     </PropertyGroup>

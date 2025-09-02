@@ -1,16 +1,15 @@
+using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace Cav.Logger.Telegram;
 
 internal sealed class TelegramLogger(
     string categoryName,
-    Func<TelegramLoggerConfiguration> getCurrentConfig) : ILogger, IDisposable
+    Func<TelegramLoggerConfiguration> getCurrentConfig,
+    IExternalScopeProvider? scopeProvider) : ILogger
 {
     private readonly string categoryName = categoryName;
     private readonly Func<TelegramLoggerConfiguration> getCurConfig = getCurrentConfig;
-
-    private QueueMessageWriter qmWriter = new();
-    private TelegramMessageFormatter telMesFormatter = new();
 
 #pragma warning disable IDE0060 // Удалите неиспользуемый параметр
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull => default!;
@@ -20,9 +19,11 @@ internal sealed class TelegramLogger(
     {
         var curConf = getCurConfig();
 
-        return logLevel != LogLevel.None &&
-            !String.IsNullOrWhiteSpace(curConf.BotToken) &&
-            !String.IsNullOrWhiteSpace(curConf.ChatId);
+        return true;
+
+        //return logLevel != LogLevel.None &&
+        //    !String.IsNullOrWhiteSpace(curConf.BotToken) &&
+        //    !String.IsNullOrWhiteSpace(curConf.ChatId);
     }
 
     public void Log<TState>(
@@ -35,26 +36,77 @@ internal sealed class TelegramLogger(
         if (!IsEnabled(logLevel))
             return;
 
-        string message = null!;
-        if (formatter != null)
-            message = formatter(state, exception);
-
-        if (exception != null)
-        {
-            if (@String.IsNullOrWhiteSpace(message))
-                message += Environment.NewLine;
-
-            message += exception.Message;
-        }
-
         var options = getCurConfig();
 
-        if (!String.IsNullOrWhiteSpace(message))
-            message = telMesFormatter.Format(logLevel, categoryName, message, exception, options);
+        var sb = new StringBuilder();
 
-        if (!String.IsNullOrWhiteSpace(message))
-            qmWriter.Enqueue(message, options.BotToken!, options.ChatId!, options.DisableNotification?.Invoke() ?? false);
+        sb.AppendLine($"{(options.UseEmoji ? toEmoji(logLevel) : String.Empty)}{logLevel} {categoryName}");
+
+        scopeProvider?.ForEachScope((val, _) =>
+        {
+            if (val is null)
+                return;
+
+            var ikv = val as IEnumerable<KeyValuePair<string, object>>;
+            if (ikv is not null)
+                foreach (var item in ikv)
+                    sb.AppendLine($"{item.Key}:{item.Value}");
+            else
+                sb.AppendLine(val.ToString());
+        }, state);
+
+        if (exception is not null)
+        {
+            foreach (var key in exception.Data.Keys)
+                sb.AppendLine($"{key}: {exception.Data[key]}");
+        }
+
+        var formatedMessage = formatter?.Invoke(state, exception);
+        if (!string.IsNullOrWhiteSpace(formatedMessage))
+            sb.AppendLine(formatedMessage);
+
+        if (exception is not null)
+        {
+            sb.AppendLine(exception.Message);
+            sb.AppendLine($"Type: {exception.GetType().FullName}");
+            sb.AppendLine($"Source: {exception.Source}");
+            sb.AppendLine($"StackTrace: {exception.StackTrace}");
+
+            void vizitToInner(Exception? ex)
+            {
+                if (ex is null)
+                    return;
+
+                sb.AppendLine("----InnerException---");
+                sb.AppendLine(ex.Message);
+                foreach (var key in ex.Data.Keys)
+                    sb.AppendLine($"{key}: {ex.Data[key]}");
+                sb.AppendLine($"Type: {ex.GetType().FullName}");
+                sb.AppendLine($"Source: {ex.Source}");
+                sb.AppendLine($"StackTrace: {ex.StackTrace}");
+                vizitToInner(ex.InnerException);
+            }
+
+            vizitToInner(exception.InnerException);
+        }
+
+        QueueMessageWriter.Enqueue(sb.ToString(), options.BotToken!, options.ChatId!, options.DisableNotification?.Invoke() ?? false);
     }
 
-    public void Dispose() => qmWriter.Dispose();
+    /// <summary>
+    /// Преобразование <see cref="LogLevel"/> в эмодзи
+    /// </summary>
+    /// <param name="level"></param>
+    /// <returns></returns>
+    private string toEmoji(LogLevel level) =>
+        level switch
+        {
+            LogLevel.Trace => "⚡️",
+            LogLevel.Debug => "⚙️",
+            LogLevel.Information => "ℹ️",
+            LogLevel.Warning => "⚠️",
+            LogLevel.Error => "🛑",
+            LogLevel.Critical => "❌",
+            _ => "💤"
+        };
 }
