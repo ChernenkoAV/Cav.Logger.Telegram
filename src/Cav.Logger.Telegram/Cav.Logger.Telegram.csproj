@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <PackageVersion>0.6.0</PackageVersion>
+        <PackageVersion>0.6.1</PackageVersion>
         <Description>Логгер в телеграм</Description>
         <PackageTags>$(PackageTags) logger telegram</PackageTags>
     </PropertyGroup>

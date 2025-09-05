@@ -41,8 +41,6 @@ internal sealed class TelegramLogger(
         var sb = new StringBuilder();
 
         sb.AppendLine($"{(options.UseEmoji ? toEmoji(logLevel) : String.Empty)}{logLevel} {categoryName}");
-        sb.AppendLine("-------");
-
         scopeProvider?.ForEachScope((val, _) =>
         {
             if (val is null)
@@ -62,16 +60,18 @@ internal sealed class TelegramLogger(
                 sb.AppendLine($"{key}: {exception.Data[key]}");
         }
 
-        sb.AppendLine("-------");
-
-        var formatedMessage = formatter?.Invoke(state, exception);
+        var formatedMessage = formatter?.Invoke(state, exception) ?? string.Empty;
+        formatedMessage = formatedMessage.TrimEnd(['\n', '\r']).Trim();
         if (!string.IsNullOrWhiteSpace(formatedMessage))
+        {
+            sb.AppendLine("-------");
             sb.AppendLine(formatedMessage);
-
-        sb.AppendLine("-------");
+        }
 
         if (exception is not null)
         {
+            sb.AppendLine("-------");
+
             sb.AppendLine(exception.Message);
             sb.AppendLine($"Type: {exception.GetType().FullName}");
             if (options.ShowStackTrace?.Invoke(exception) ?? false)
