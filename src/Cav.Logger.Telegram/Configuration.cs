@@ -18,8 +18,12 @@ public sealed class TelegramLoggerConfiguration
     public bool UseEmoji { get; set; } = true;
 
     /// <summary>
-    /// Функтор указания отключения уведомления для сообщения. 
+    /// Функтор указания отключения уведомления для сообщения. По умолчанию - уведомление включено.
     /// </summary>
     /// <returns></returns>
     public Func<bool> DisableNotification { get; set; } = () => false;
+    /// <summary>
+    /// Функтор указания вывода в тексе <see cref="Exception.StackTrace"/>. По умолчанию - вывод отключен.
+    /// </summary>
+    public Func<Exception, bool> ShowStackTrace { get; set; } = (ex) => false;
 }

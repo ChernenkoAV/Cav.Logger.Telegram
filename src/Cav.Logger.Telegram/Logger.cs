@@ -41,6 +41,7 @@ internal sealed class TelegramLogger(
         var sb = new StringBuilder();
 
         sb.AppendLine($"{(options.UseEmoji ? toEmoji(logLevel) : String.Empty)}{logLevel} {categoryName}");
+        sb.AppendLine("-------");
 
         scopeProvider?.ForEachScope((val, _) =>
         {
@@ -61,16 +62,20 @@ internal sealed class TelegramLogger(
                 sb.AppendLine($"{key}: {exception.Data[key]}");
         }
 
+        sb.AppendLine("-------");
+
         var formatedMessage = formatter?.Invoke(state, exception);
         if (!string.IsNullOrWhiteSpace(formatedMessage))
             sb.AppendLine(formatedMessage);
+
+        sb.AppendLine("-------");
 
         if (exception is not null)
         {
             sb.AppendLine(exception.Message);
             sb.AppendLine($"Type: {exception.GetType().FullName}");
-            sb.AppendLine($"Source: {exception.Source}");
-            sb.AppendLine($"StackTrace: {exception.StackTrace}");
+            if (options.ShowStackTrace?.Invoke(exception) ?? false)
+                sb.AppendLine($"StackTrace: {exception.StackTrace}");
 
             void vizitToInner(Exception? ex)
             {
@@ -82,8 +87,10 @@ internal sealed class TelegramLogger(
                 foreach (var key in ex.Data.Keys)
                     sb.AppendLine($"{key}: {ex.Data[key]}");
                 sb.AppendLine($"Type: {ex.GetType().FullName}");
-                sb.AppendLine($"Source: {ex.Source}");
-                sb.AppendLine($"StackTrace: {ex.StackTrace}");
+
+                if (options.ShowStackTrace?.Invoke(ex) ?? false)
+                    sb.AppendLine($"StackTrace: {exception.StackTrace}");
+
                 vizitToInner(ex.InnerException);
             }
 
