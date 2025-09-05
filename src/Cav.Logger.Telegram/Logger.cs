@@ -61,7 +61,7 @@ internal sealed class TelegramLogger(
         }
 
         var formatedMessage = formatter?.Invoke(state, exception) ?? string.Empty;
-        formatedMessage = formatedMessage.TrimEnd(['\n', '\r']).Trim();
+        formatedMessage = formatedMessage.Trim(['\n', '\r']).Trim();
         if (!string.IsNullOrWhiteSpace(formatedMessage))
         {
             sb.AppendLine("-------");
@@ -73,9 +73,11 @@ internal sealed class TelegramLogger(
             sb.AppendLine("-------");
 
             sb.AppendLine(exception.Message);
-            sb.AppendLine($"Type: {exception.GetType().FullName}");
             if (options.ShowStackTrace?.Invoke(exception) ?? false)
+            {
+                sb.AppendLine($"Type: {exception.GetType().FullName}");
                 sb.AppendLine($"StackTrace: {exception.StackTrace}");
+            }
 
             void vizitToInner(Exception? ex)
             {
@@ -86,10 +88,12 @@ internal sealed class TelegramLogger(
                 sb.AppendLine(ex.Message);
                 foreach (var key in ex.Data.Keys)
                     sb.AppendLine($"{key}: {ex.Data[key]}");
-                sb.AppendLine($"Type: {ex.GetType().FullName}");
 
                 if (options.ShowStackTrace?.Invoke(ex) ?? false)
+                {
                     sb.AppendLine($"StackTrace: {exception.StackTrace}");
+                    sb.AppendLine($"Type: {ex.GetType().FullName}");
+                }
 
                 vizitToInner(ex.InnerException);
             }
