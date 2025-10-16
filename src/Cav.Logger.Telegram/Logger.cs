@@ -19,11 +19,9 @@ internal sealed class TelegramLogger(
     {
         var curConf = getCurConfig();
 
-        return true;
-
-        //return logLevel != LogLevel.None &&
-        //    !String.IsNullOrWhiteSpace(curConf.BotToken) &&
-        //    !String.IsNullOrWhiteSpace(curConf.ChatId);
+        return logLevel != LogLevel.None &&
+            !String.IsNullOrWhiteSpace(curConf.BotToken) &&
+            !String.IsNullOrWhiteSpace(curConf.ChatId);
     }
 
     public void Log<TState>(
@@ -41,6 +39,9 @@ internal sealed class TelegramLogger(
         var sb = new StringBuilder();
 
         sb.AppendLine($"{(options.UseEmoji ? toEmoji(logLevel) : String.Empty)}{logLevel} {categoryName}");
+
+        Dictionary<string, string> adddata = [];
+
         scopeProvider?.ForEachScope((val, _) =>
         {
             if (val is null)
@@ -49,7 +50,7 @@ internal sealed class TelegramLogger(
             var ikv = val as IEnumerable<KeyValuePair<string, object>>;
             if (ikv is not null)
                 foreach (var item in ikv)
-                    sb.AppendLine($"{item.Key}:{item.Value}");
+                    adddata[item.Key] = item.Value.ToString()!;
             else
                 sb.AppendLine(val.ToString());
         }, state);
@@ -57,8 +58,12 @@ internal sealed class TelegramLogger(
         if (exception is not null)
         {
             foreach (var key in exception.Data.Keys)
-                sb.AppendLine($"{key}: {exception.Data[key]}");
+                if (key is not null)
+                    adddata[key.ToString() ?? string.Empty] = exception.Data[key]?.ToString() ?? String.Empty;
         }
+
+        foreach (var i in adddata)
+            sb.AppendLine($"{i.Key}:{i.Value}");
 
         var formatedMessage = formatter?.Invoke(state, exception) ?? string.Empty;
         formatedMessage = formatedMessage.Trim(['\n', '\r']).Trim();
@@ -91,8 +96,8 @@ internal sealed class TelegramLogger(
 
                 if (options.ShowStackTrace?.Invoke(ex) ?? false)
                 {
-                    sb.AppendLine($"StackTrace: {exception.StackTrace}");
                     sb.AppendLine($"Type: {ex.GetType().FullName}");
+                    sb.AppendLine($"StackTrace: {exception.StackTrace}");
                 }
 
                 vizitToInner(ex.InnerException);
