@@ -75,11 +75,18 @@ internal sealed class TelegramLogger(
 
         if (exception is not null)
         {
-            sb.AppendLine("-------");
+            var printMessage = formatedMessage != exception.Message;
 
-            sb.AppendLine(exception.Message);
+            if (printMessage)
+            {
+                sb.AppendLine("-------");
+                sb.AppendLine(exception.Message);
+            }
+
             if (options.ShowStackTrace?.Invoke(exception) ?? false)
             {
+                if (!printMessage)
+                    sb.AppendLine("-------");
                 sb.AppendLine($"Type: {exception.GetType().FullName}");
                 sb.AppendLine($"StackTrace: {exception.StackTrace}");
             }
@@ -90,9 +97,10 @@ internal sealed class TelegramLogger(
                     return;
 
                 sb.AppendLine("----InnerException---");
-                sb.AppendLine(ex.Message);
                 foreach (var key in ex.Data.Keys)
                     sb.AppendLine($"{key}: {ex.Data[key]}");
+                sb.AppendLine("-------");
+                sb.AppendLine(ex.Message);
 
                 if (options.ShowStackTrace?.Invoke(ex) ?? false)
                 {
