@@ -75,12 +75,13 @@ internal sealed class TelegramLogger(
 
         if (exception is not null)
         {
-            var printMessage = formatedMessage != exception.Message;
+            var expMsg = exception.Message.Trim(['\n', '\r']).Trim();
+            var printMessage = formatedMessage != expMsg;
 
             if (printMessage)
             {
                 sb.AppendLine("-------");
-                sb.AppendLine(exception.Message);
+                sb.AppendLine(expMsg);
             }
 
             if (options.ShowStackTrace?.Invoke(exception) ?? false)
