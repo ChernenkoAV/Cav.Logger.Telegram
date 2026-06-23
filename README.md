@@ -1,5 +1,9 @@
 ## Логгер в телеграмм
 Простейший логгер в телеграм для Microsoft DI. Сборка имеет строгое имя. При отправке большого текста он отправляется файлом. Рекомендуется использовать только в дев/тест/стэйджинг контурах.
+
+[nuget](https://www.nuget.org/packages/Cav.Logger.Telegram/)
+
+<img alt="NuGet Version" src="https://img.shields.io/nuget/v/Cav.Logger.Telegram.svg" />
  
 ### Конфигурация
  
