@@ -9,21 +9,27 @@
  
 ```json
 {
-    "Logging": {
+  "Logging": {
+     "LogLevel": {
+        "Default": "Information",
+        "Microsoft.Hosting.Lifetime": "None"
+     },
+     "Telegram": {
         "LogLevel": {
-            "Default": "Information",
-            "Microsoft.Hosting.Lifetime": "None"
+           "Default": "Trace"
         },
-        "Telegram": {
-            "LogLevel": {
-                "Default": "Trace"
-                },
-            "BotToken": "bot_token",
-            "ChatId": "chat_id"
-        }
-    }
+        "BotToken": "bot_token",
+        "ChatId": "chat_id",
+        "Proxy" : "http://host:port",
+        "Relay" : "http://host:port/path"
+     }
+  }
 }
 ```
+
+### Необязательные параметры
+- Proxy - url к прокси-серверу.  
+- Relay - url к релейному серверу
  
 Корректно отрабатывается конфигурация "общая" и непосредственно логгера.
 
@@ -34,20 +40,26 @@ The simplest telegram logger for Microsoft DI. The assembly has a strong name. W
  
 ```json
 {
-     "Logging": {
-         "LogLevel": {
-             "Default": "Information",
-             "Microsoft.Hosting.Lifetime": "None"
-         },
-         "Telegram": {
-             "LogLevel": {
-                 "Default": "Trace"
-                 },
-             "BotToken": "bot_token",
-             "ChatId": "chat_id"
-         }
+  "Logging": {
+     "LogLevel": {
+        "Default": "Information",
+        "Microsoft.Hosting.Lifetime": "None"
+     },
+     "Telegram": {
+        "LogLevel": {
+           "Default": "Trace"
+        },
+        "BotToken": "bot_token",
+        "ChatId": "chat_id",
+        "Proxy" : "http://host:port",
+        "Relay" : "http://host:port/path"
      }
+  }
 }
 ```
+
+### Optional parameters
+- Proxy - url to the proxy server  
+- Relay - url to the relay server
  
 The "general" configuration and the logger itself are correctly worked out.
