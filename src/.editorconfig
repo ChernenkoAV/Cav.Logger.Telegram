@@ -112,6 +112,7 @@ csharp_style_prefer_switch_expression = true:warning
 
 # Настройки проверки на null
 csharp_style_conditional_delegate_call = true:error
+dotnet_style_null_propagation = true:error
 
 # Предпочтения модификатора
 csharp_prefer_static_local_function = true:suggestion
@@ -326,5 +327,3 @@ dotnet_naming_style.camel_case.capitalization = camel_case
 
 # Default severity for analyzer diagnostics with category 'Globalization'
 dotnet_analyzer_diagnostic.category-Globalization.severity = silent
-
-

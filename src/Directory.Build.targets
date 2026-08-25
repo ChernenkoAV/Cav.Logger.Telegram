@@ -10,15 +10,6 @@
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(TargetFramework)' != 'net4.8' AND '$(TargetFrameworkVersion)' != 'v4.8'">
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(TargetFramework)' == 'net4.8' OR '$(TargetFrameworkVersion)' == 'v4.8'">
-        <ImplicitUsings>disable</ImplicitUsings>
-        <Nullable>disable</Nullable>
-    </PropertyGroup>
-
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
         <RepositoryType>git</RepositoryType>
 
@@ -39,9 +30,9 @@
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
         <PackageVersion Condition="'$(PackageVersion)' != '' ">$(PackageVersion)-dev.$([System.DateTime]::Now.Tostring("yyyyMMddHHmm"))</PackageVersion>
-        <!--<DebugType>portable</DebugType>-->
+        <DebugType>portable</DebugType>
         <!--<DebugType>embedded</DebugType>-->
-        <DebugType>full</DebugType>
+        <!--<DebugType>full</DebugType>-->
         <Optimize>false</Optimize>
         <DebugSymbols>true</DebugSymbols>
         <CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>
