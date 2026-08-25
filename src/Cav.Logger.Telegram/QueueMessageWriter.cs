@@ -2,13 +2,8 @@ using System.Collections.Concurrent;
 
 namespace Cav.Logger.Telegram;
 
-internal class QueueMessage(string message, string botToken, string chatId, bool disableNotification)
-{
-    public string Message => message;
-    public string BotToken => botToken;
-    public string ChatId => chatId;
-    public bool DisableNotification => disableNotification;
-};
+internal record QueueMessageSettings(string BotToken, string ChatId, bool DisableNotification, Uri? Proxy, Uri? Relay);
+internal record QueueMessage(string Message, QueueMessageSettings Settings);
 
 internal static class QueueMessageWriter
 {
@@ -25,8 +20,8 @@ internal static class QueueMessageWriter
         thrd.Start();
     }
 
-    public static void Enqueue(string message, string botToken, string chatId, bool disableNotification) =>
-        queues.Add(new(message, botToken, chatId, disableNotification));
+    public static void Enqueue(string message, QueueMessageSettings settings) =>
+        queues.Add(new(message, settings));
 
     private static void sendMesg()
     {

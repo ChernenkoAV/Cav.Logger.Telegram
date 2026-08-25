@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Net;
 using System.Text;
 using RestSharp;
 
@@ -12,7 +14,7 @@ internal static class TelegramLogWriter
             Method = Method.Post
         };
 
-        var dn = queueMessage.DisableNotification.ToString().ToLower();
+        var dn = queueMessage.Settings.DisableNotification.ToString().ToLower();
 
         if (queueMessage.Message.Length >= 4000)
         {
@@ -20,7 +22,7 @@ internal static class TelegramLogWriter
             req.AlwaysMultipartFormData = true;
 
             req.AddParameter("file_id", DateTime.Now.Ticks.ToString())
-                .AddParameter("chat_id", queueMessage.ChatId)
+                .AddParameter("chat_id", queueMessage.Settings.ChatId)
                 .AddParameter("caption", queueMessage.Message[..1000])
                 .AddParameter("disable_content_type_detection", "true")
                 .AddParameter("disable_notification", dn)
@@ -31,21 +33,25 @@ internal static class TelegramLogWriter
             req.Resource = "sendMessage";
             req.AddJsonBody(new
             {
-                chat_id = queueMessage.ChatId,
+                chat_id = queueMessage.Settings.ChatId,
                 text = queueMessage.Message,
                 disable_notification = dn
             });
         }
 
+        var uriBuilder = new UriBuilder(queueMessage.Settings.Relay ?? new Uri("https://api.telegram.org"));
+        uriBuilder.Path = $"{uriBuilder.Path}/bot{queueMessage.Settings.BotToken}".Trim('/');
+
+        var webProxy = queueMessage.Settings.Proxy is null ? null : new WebProxy(queueMessage.Settings.Proxy);
+
         try
         {
-            using var client = new RestClient(
-                new RestClientOptions(
-                    new Uri($"https://api.telegram.org/bot{queueMessage.BotToken}/")
-                    ),
-                useClientFactory: true);
+            using var client = new RestClient(new RestClientOptions(uriBuilder.Uri) { Proxy = webProxy, Timeout = TimeSpan.FromSeconds(2) }, useClientFactory: true);
             await client.ExecuteAsync(req).ConfigureAwait(false);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Trace.WriteLine(ex.Message);
+        }
     }
 }

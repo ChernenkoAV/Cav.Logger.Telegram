@@ -16,6 +16,14 @@ public sealed class TelegramLoggerConfiguration
     /// Всовывать эмоджи первым символом сообщения. Включено по умолчанию
     /// </summary>
     public bool UseEmoji { get; set; } = true;
+    /// <summary>
+    /// Прокси
+    /// </summary>
+    public Uri? Proxy { get; set; }
+    /// <summary>
+    /// Релейный сервер
+    /// </summary>
+    public Uri? Relay { get; set; }
 
     /// <summary>
     /// Функтор указания отключения уведомления для сообщения. По умолчанию - уведомление включено.

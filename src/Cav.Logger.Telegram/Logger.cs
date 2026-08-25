@@ -115,7 +115,7 @@ internal sealed class TelegramLogger(
             vizitToInner(exception.InnerException);
         }
 
-        QueueMessageWriter.Enqueue(sb.ToString(), options.BotToken!, options.ChatId!, options.DisableNotification?.Invoke() ?? false);
+        QueueMessageWriter.Enqueue(sb.ToString(), new(options.BotToken!, options.ChatId!, options.DisableNotification?.Invoke() ?? false, options.Proxy, options.Relay));
     }
 
     /// <summary>

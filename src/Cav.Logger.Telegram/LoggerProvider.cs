@@ -9,8 +9,7 @@ internal sealed class TelegramLoggerProvider : ILoggerProvider, ISupportExternal
 {
     private readonly IDisposable? onChangeToken;
     private TelegramLoggerConfiguration curConfig;
-    private readonly ConcurrentDictionary<string, TelegramLogger> loggers =
-        new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, TelegramLogger> loggers = new(StringComparer.OrdinalIgnoreCase);
 
     private IExternalScopeProvider? iExternalScopeProvider;
     public TelegramLoggerProvider(
