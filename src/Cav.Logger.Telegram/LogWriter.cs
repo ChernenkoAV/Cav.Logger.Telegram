@@ -46,7 +46,7 @@ internal static class TelegramLogWriter
 
         try
         {
-            using var client = new RestClient(new RestClientOptions(uriBuilder.Uri) { Proxy = webProxy, Timeout = TimeSpan.FromSeconds(2) }, useClientFactory: true);
+            using var client = new RestClient(new RestClientOptions(uriBuilder.Uri) { Proxy = webProxy }, useClientFactory: true);
             await client.ExecuteAsync(req).ConfigureAwait(false);
         }
         catch (Exception ex)
